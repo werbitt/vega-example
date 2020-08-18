@@ -1,11 +1,11 @@
 module Main where
 
 import Prelude
+import Control.Promise (Promise, toAffE)
 import Data.Argonaut.Core (Json)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -23,7 +23,7 @@ foreign import data View :: Type
 
 foreign import chartSpec :: Json
 
-foreign import render :: String -> Json -> Effect View
+foreign import render :: String -> Json -> Effect (Promise View)
 
 myComponent ::
   forall query input output m.
@@ -32,7 +32,7 @@ myComponent ::
 myComponent =
   Hooks.component \_ _ -> Hooks.do
     Hooks.useLifecycleEffect do
-      void $ liftEffect $ render "#chart" chartSpec
+      void $ liftAff $ toAffE $ render "#chart" chartSpec
       pure Nothing
     Hooks.pure do
       HH.div_
