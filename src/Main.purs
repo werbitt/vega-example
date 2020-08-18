@@ -1,7 +1,7 @@
 module Main where
 
 import Prelude
-import Control.Promise (Promise, toAffE)
+import Control.Promise (Promise, toAff)
 import Data.Argonaut.Core (Json)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
@@ -23,7 +23,7 @@ foreign import data View :: Type
 
 foreign import chartSpec :: Json
 
-foreign import render :: String -> Json -> Effect (Promise View)
+foreign import render :: String -> Json -> Promise View
 
 myComponent ::
   forall query input output m.
@@ -32,7 +32,7 @@ myComponent ::
 myComponent =
   Hooks.component \_ _ -> Hooks.do
     Hooks.useLifecycleEffect do
-      void $ liftAff $ toAffE $ render "#chart" chartSpec
+      void $ liftAff $ toAff $ render "#chart" chartSpec
       pure Nothing
     Hooks.pure do
       HH.div_
