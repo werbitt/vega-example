@@ -4,6 +4,7 @@ import Prelude
 import Control.Promise (Promise, toAff)
 import Data.Argonaut.Core (Json)
 import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse_)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Halogen as H
@@ -11,6 +12,7 @@ import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Hooks as Hooks
+import Halogen.Query.Input (RefLabel(..))
 import Halogen.VDom.Driver (runUI)
 
 main :: Effect Unit
@@ -32,13 +34,17 @@ myComponent ::
 myComponent =
   Hooks.component \_ _ -> Hooks.do
     Hooks.useLifecycleEffect do
-      void $ liftAff $ toAff $ render "#chart" chartSpec
+      Hooks.getHTMLElementRef (RefLabel "chart")
+        >>= traverse_ \_ -> do
+            void $ liftAff $ toAff $ render "#chart" chartSpec
       pure Nothing
     Hooks.pure do
       HH.div_
         [ HH.p_
             [ HH.text "Vega Example" ]
         , HH.div
-            [ HP.id_ "chart" ]
+            [ HP.id_ "chart"
+            , HP.ref (RefLabel "chart")
+            ]
             [ HH.text "" ]
         ]
